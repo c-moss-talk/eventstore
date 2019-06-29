@@ -9,7 +9,7 @@ config :ex_unit,
 
 config :eventstore, EventStore.Storage,
   serializer: EventStore.JsonbSerializer,
-  types: EventStore.PostgresTypes,
+  # types: EventStore.PostgresTypes,
   username: "postgres",
   password: "postgres",
   database: "eventstore_jsonb_test",

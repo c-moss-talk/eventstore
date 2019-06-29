@@ -69,13 +69,13 @@ defmodule EventStore.Storage.Database do
       ]
   end
 
-  # Taken from ecto/adapters/postgres.ex
+  # Taken from ecto/adapters/mysql.ex
   defp storage_up(opts) do
     database =
       Keyword.fetch!(opts, :database) || raise ":database is nil in repository configuration"
 
     encoding = opts[:encoding] || "UTF8"
-    opts = Keyword.put(opts, :database, "postgres")
+    opts = Keyword.put(opts, :database, "mysql")
 
     command =
       ~s(CREATE DATABASE "#{database}" ENCODING '#{encoding}')
@@ -87,7 +87,7 @@ defmodule EventStore.Storage.Database do
       {:ok, _} ->
         :ok
 
-      {:error, %{postgres: %{code: :duplicate_database}}} ->
+      {:error, %{mysql: %{code: :duplicate_database}}} ->
         {:error, :already_up}
 
       {:error, error} ->
@@ -103,13 +103,13 @@ defmodule EventStore.Storage.Database do
       Keyword.fetch!(opts, :database) || raise ":database is nil in repository configuration"
 
     command = "DROP DATABASE \"#{database}\""
-    opts = Keyword.put(opts, :database, "postgres")
+    opts = Keyword.put(opts, :database, "mysql")
 
     case run_query(command, opts) do
       {:ok, _} ->
         :ok
 
-      {:error, %{postgres: %{code: :invalid_catalog_name}}} ->
+      {:error, %{mysql: %{code: :invalid_catalog_name}}} ->
         {:error, :already_down}
 
       {:error, error} ->
@@ -131,7 +131,6 @@ defmodule EventStore.Storage.Database do
     task =
       Task.Supervisor.async_nolink(pid, fn ->
         {:ok, conn} = MyXQL.start_link(opts)
-
         value = execute(conn, sql, [], opts)
         GenServer.stop(conn)
         value
@@ -158,7 +157,7 @@ defmodule EventStore.Storage.Database do
     end
   end
 
-  # Taken from ecto/adapters/postgres/connection.ex
+  # Taken from ecto/adapters/mysql/connection.ex
   defp execute(conn, sql, params, opts) when is_binary(sql) or is_list(sql) do
     query = %MyXQL.Query{name: "", statement: sql}
     opts = [function: :prepare_execute] ++ opts
@@ -185,7 +184,7 @@ defmodule EventStore.Storage.Database do
       {:error, %ArgumentError{} = err} ->
         {:reset, err}
 
-      {:error, %MyXQL.Error{postgres: %{code: :feature_not_supported}} = err} ->
+      {:error, %MyXQL.Error{mysql: %{code: :feature_not_supported}} = err} ->
         {:reset, err}
 
       {:error, %MyXQL.Error{}} = error ->

@@ -185,7 +185,7 @@ defmodule EventStore.Storage.Appender do
 
   defp handle_response({:error, %MyXQL.Error{} = error}) do
     %MyXQL.Error{
-      postgres: %{
+      mysql: %{
         code: error_code,
         constraint: constraint,
         message: message

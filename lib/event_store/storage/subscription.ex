@@ -122,7 +122,7 @@ defmodule EventStore.Storage.Subscription do
     end
 
     defp handle_response(
-           {:error, %MyXQL.Error{postgres: %{code: :unique_violation}}},
+           {:error, %MyXQL.Error{mysql: %{code: :unique_violation}}},
            stream_uuid,
            subscription_name
          ) do

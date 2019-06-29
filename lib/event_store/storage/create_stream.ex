@@ -18,7 +18,7 @@ defmodule EventStore.Storage.CreateStream do
     {:ok, stream_id}
   end
 
-  defp handle_create_response({:error, %MyXQL.Error{postgres: %{code: :unique_violation}}}, stream_uuid) do
+  defp handle_create_response({:error, %MyXQL.Error{mysql: %{code: :unique_violation}}}, stream_uuid) do
     _ = Logger.warn(fn -> "Failed to create stream #{inspect stream_uuid}, already exists" end)
     {:error, :stream_exists}
   end

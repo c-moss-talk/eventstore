@@ -104,7 +104,7 @@ defmodule EventStore.Storage.Reader do
         {:ok, %MyXQL.Result{rows: rows}} ->
           {:ok, rows}
 
-        {:error, %MyXQL.Error{postgres: %{message: reason}}} ->
+        {:error, %MyXQL.Error{mysql: %{message: reason}}} ->
           Logger.warn(fn -> "Failed to read events from stream due to: #{inspect(reason)}" end)
 
           {:error, reason}
