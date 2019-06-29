@@ -8,7 +8,7 @@ defmodule EventStore.StorageCase do
     config = Config.parsed()
     postgrex_config = Config.default_postgrex_opts(config)
 
-    {:ok, conn} = Postgrex.start_link(postgrex_config)
+    {:ok, conn} = MyXQL.start_link(postgrex_config)
 
     [conn: conn]
   end

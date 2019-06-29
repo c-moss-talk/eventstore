@@ -1,3 +1,3 @@
-if Code.ensure_loaded?(Postgrex) && Code.ensure_loaded?(Jason) do
-  Postgrex.Types.define(EventStore.PostgresTypes, [], json: Jason)
+if Code.ensure_loaded?(MyXQL) && Code.ensure_loaded?(Jason) do
+  MyXQL.Types.define(EventStore.PostgresTypes, [], json: Jason)
 end

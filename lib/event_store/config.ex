@@ -176,7 +176,7 @@ defmodule EventStore.Config do
         ]
     )
     |> Keyword.put(:backoff_type, :exp)
-    |> Keyword.put(:name, EventStore.Postgrex)
+    |> Keyword.put(:name, EventStore.MyXQL)
   end
 
   def sync_connect_postgrex_opts(config) do

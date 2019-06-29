@@ -7,11 +7,11 @@ defmodule EventStore.Storage.Snapshot do
   alias EventStore.Sql.Statements
 
   def read_snapshot(conn, source_uuid, opts \\ []) do
-    case Postgrex.query(conn, Statements.query_get_snapshot(), [source_uuid], opts) do
-      {:ok, %Postgrex.Result{num_rows: 0}} ->
+    case MyXQL.query(conn, Statements.query_get_snapshot(), [source_uuid], opts) do
+      {:ok, %MyXQL.Result{num_rows: 0}} ->
         {:error, :snapshot_not_found}
 
-      {:ok, %Postgrex.Result{rows: [row]}} ->
+      {:ok, %MyXQL.Result{rows: [row]}} ->
         {:ok, to_snapshot_from_row(row)}
 
       {:error, error} = reply ->
@@ -34,7 +34,7 @@ defmodule EventStore.Storage.Snapshot do
 
     params = [source_uuid, source_version, source_type, data, metadata]
 
-    case Postgrex.query(conn, Statements.record_snapshot(), params, opts) do
+    case MyXQL.query(conn, Statements.record_snapshot(), params, opts) do
       {:ok, _result} ->
         :ok
 
@@ -50,7 +50,7 @@ defmodule EventStore.Storage.Snapshot do
   end
 
   def delete_snapshot(conn, source_uuid, opts \\ []) do
-    case Postgrex.query(conn, Statements.delete_snapshot(), [source_uuid], opts) do
+    case MyXQL.query(conn, Statements.delete_snapshot(), [source_uuid], opts) do
       {:ok, _result} ->
         :ok
 

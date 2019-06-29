@@ -59,7 +59,7 @@ defmodule EventStore.Subscriptions.SubscriptionRecoveryTest do
 
   defp get_port do
     pid =
-      GenServer.whereis(EventStore.Notifications.Listener.Postgrex)
+      GenServer.whereis(EventStore.Notifications.Listener.MyXQL)
       |> :sys.get_state()
       |> Map.get(:pid)
 

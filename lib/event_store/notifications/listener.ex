@@ -23,16 +23,16 @@ defmodule EventStore.Notifications.Listener do
   end
 
   def init(%Listener{} = state) do
-    :ok = MonitoredServer.monitor(Listener.Postgrex)
+    :ok = MonitoredServer.monitor(Listener.MyXQL)
 
     {:producer, state}
   end
 
-  def handle_info({:UP, Listener.Postgrex, _pid}, %Listener{} = state) do
+  def handle_info({:UP, Listener.MyXQL, _pid}, %Listener{} = state) do
     {:noreply, [], listen_for_events(state)}
   end
 
-  def handle_info({:DOWN, Listener.Postgrex, _pid, _reason}, %Listener{} = state) do
+  def handle_info({:DOWN, Listener.MyXQL, _pid, _reason}, %Listener{} = state) do
     {:noreply, [], %Listener{state | ref: nil}}
   end
 
@@ -84,7 +84,7 @@ defmodule EventStore.Notifications.Listener do
 
   defp listen_for_events(%Listener{} = state) do
     {:ok, ref} =
-      Postgrex.Notifications.listen(EventStore.Notifications.Listener.Postgrex, "events")
+      MyXQL.Notifications.listen(EventStore.Notifications.Listener.MyXQL, "events")
 
     %Listener{state | ref: ref}
   end

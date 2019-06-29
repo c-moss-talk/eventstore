@@ -26,7 +26,7 @@ defmodule EventStore do
   alias EventStore.Subscriptions.Subscription
   alias EventStore.Streams.Stream
 
-  @conn EventStore.Postgrex
+  @conn EventStore.MyXQL
   @all_stream "$all"
   @default_batch_size 1_000
   @default_count 1_000

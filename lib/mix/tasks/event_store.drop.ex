@@ -16,7 +16,7 @@ defmodule Mix.Tasks.EventStore.Drop do
 
   @doc false
   def run(_args) do
-    {:ok, _} = Application.ensure_all_started(:postgrex)
+    {:ok, _} = Application.ensure_all_started(:myxql)
     {:ok, _} = Application.ensure_all_started(:ssl)
 
     config = Config.parsed()

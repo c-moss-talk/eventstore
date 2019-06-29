@@ -118,7 +118,7 @@ defmodule EventStore.Storage.Database do
   end
 
   defp run_query(sql, opts) do
-    {:ok, _} = Application.ensure_all_started(:postgrex)
+    {:ok, _} = Application.ensure_all_started(:myxql)
 
     opts =
       opts
@@ -130,7 +130,7 @@ defmodule EventStore.Storage.Database do
 
     task =
       Task.Supervisor.async_nolink(pid, fn ->
-        {:ok, conn} = Postgrex.start_link(opts)
+        {:ok, conn} = MyXQL.start_link(opts)
 
         value = execute(conn, sql, [], opts)
         GenServer.stop(conn)
@@ -147,7 +147,7 @@ defmodule EventStore.Storage.Database do
         {:error, error}
 
       {:exit, {%{__struct__: struct} = error, _}}
-      when struct in [Postgrex.Error, DBConnection.Error] ->
+      when struct in [MyXQL.Error, DBConnection.Error] ->
         {:error, error}
 
       {:exit, reason} ->
@@ -160,14 +160,14 @@ defmodule EventStore.Storage.Database do
 
   # Taken from ecto/adapters/postgres/connection.ex
   defp execute(conn, sql, params, opts) when is_binary(sql) or is_list(sql) do
-    query = %Postgrex.Query{name: "", statement: sql}
+    query = %MyXQL.Query{name: "", statement: sql}
     opts = [function: :prepare_execute] ++ opts
 
     case DBConnection.prepare_execute(conn, query, params, opts) do
       {:ok, _, result} ->
         {:ok, result}
 
-      {:error, %Postgrex.Error{}} = error ->
+      {:error, %MyXQL.Error{}} = error ->
         error
 
       {:error, err} ->
@@ -185,10 +185,10 @@ defmodule EventStore.Storage.Database do
       {:error, %ArgumentError{} = err} ->
         {:reset, err}
 
-      {:error, %Postgrex.Error{postgres: %{code: :feature_not_supported}} = err} ->
+      {:error, %MyXQL.Error{postgres: %{code: :feature_not_supported}} = err} ->
         {:reset, err}
 
-      {:error, %Postgrex.Error{}} = error ->
+      {:error, %MyXQL.Error{}} = error ->
         error
 
       {:error, err} ->

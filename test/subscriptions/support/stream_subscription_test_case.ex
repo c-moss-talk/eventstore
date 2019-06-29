@@ -6,7 +6,7 @@ defmodule EventStore.Subscriptions.StreamSubscriptionTestCase do
     alias EventStore.Storage.{Appender, CreateStream}
     alias EventStore.Subscriptions.SubscriptionFsm
 
-    @conn EventStore.Postgrex
+    @conn EventStore.MyXQL
     @subscription_name "test_subscription"
 
     setup [:start_subscriber]
@@ -487,7 +487,7 @@ defmodule EventStore.Subscriptions.StreamSubscriptionTestCase do
     defp lock_subscription(_context) do
       config = EventStore.Config.parsed() |> EventStore.Config.sync_connect_postgrex_opts()
 
-      {:ok, conn} = Postgrex.start_link(config)
+      {:ok, conn} = MyXQL.start_link(config)
 
       EventStore.Storage.Lock.try_acquire_exclusive_lock(conn, 1)
 

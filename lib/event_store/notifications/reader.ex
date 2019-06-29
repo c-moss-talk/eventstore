@@ -8,7 +8,7 @@ defmodule EventStore.Notifications.Reader do
   alias EventStore.Notifications.Listener
   alias EventStore.{RecordedEvent, Storage}
 
-  @conn EventStore.Notifications.Reader.Postgrex
+  @conn EventStore.Notifications.Reader.MyXQL
 
   def start_link(serializer) do
     GenStage.start_link(__MODULE__, serializer, name: __MODULE__)

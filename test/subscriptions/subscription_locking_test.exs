@@ -4,7 +4,7 @@ defmodule EventStore.Subscriptions.SubscriptionLockingTest do
   alias EventStore.{Config, EventFactory, ProcessHelper}
   alias EventStore.Subscriptions.Subscription
 
-  @conn EventStore.Postgrex
+  @conn EventStore.MyXQL
 
   setup do
     subscription_name = UUID.uuid4()
@@ -145,7 +145,7 @@ defmodule EventStore.Subscriptions.SubscriptionLockingTest do
   defp lock_subscription(_context) do
     config = Config.parsed() |> Config.sync_connect_postgrex_opts()
 
-    {:ok, conn} = Postgrex.start_link(config)
+    {:ok, conn} = MyXQL.start_link(config)
 
     EventStore.Storage.Lock.try_acquire_exclusive_lock(conn, 1)
 
@@ -159,7 +159,7 @@ defmodule EventStore.Subscriptions.SubscriptionLockingTest do
   defp create_subscription(%{subscription_name: subscription_name}) do
     {:ok, subscription} =
       EventStore.Subscriptions.Subscription.start_link(
-        EventStore.Postgrex,
+        EventStore.MyXQL,
         "$all",
         subscription_name,
         buffer_size: 3,

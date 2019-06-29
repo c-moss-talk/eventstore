@@ -89,9 +89,9 @@ defmodule EventStore.Tasks.Migrate do
   end
 
   defp run_query(config, query) do
-    {:ok, conn} = Postgrex.start_link(config)
+    {:ok, conn} = MyXQL.start_link(config)
 
-    reply = Postgrex.query!(conn, query, [])
+    reply = MyXQL.query!(conn, query, [])
 
     true = Process.unlink(conn)
     true = Process.exit(conn, :shutdown)
@@ -99,9 +99,9 @@ defmodule EventStore.Tasks.Migrate do
     reply
   end
 
-  defp handle_response(%Postgrex.Result{num_rows: 0}), do: []
+  defp handle_response(%MyXQL.Result{num_rows: 0}), do: []
 
-  defp handle_response(%Postgrex.Result{rows: rows}) do
+  defp handle_response(%MyXQL.Result{rows: rows}) do
     Enum.map(rows, fn [major_version, minor_version, patch_version] ->
       Version.parse!("#{major_version}.#{minor_version}.#{patch_version}")
     end)

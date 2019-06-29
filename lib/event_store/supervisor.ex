@@ -19,15 +19,15 @@ defmodule EventStore.Supervisor do
   def init(config) do
     children =
       [
-        {Postgrex, Config.postgrex_opts(config)},
+        {MyXQL, Config.postgrex_opts(config)},
         MonitoredServer.child_spec([
-          {Postgrex, :start_link, [Config.sync_connect_postgrex_opts(config)]},
+          {MyXQL, :start_link, [Config.sync_connect_postgrex_opts(config)]},
           [
-            name: AdvisoryLocks.Postgrex
+            name: AdvisoryLocks.MyXQL
           ]
         ]),
-        {AdvisoryLocks, AdvisoryLocks.Postgrex},
-        {Subscriptions.Supervisor, [EventStore.Postgrex]},
+        {AdvisoryLocks, AdvisoryLocks.MyXQL},
+        {Subscriptions.Supervisor, [EventStore.MyXQL]},
         Supervisor.child_spec(
           {Registry, keys: :unique, name: Subscriptions.Subscription},
           id: Subscriptions.Subscription

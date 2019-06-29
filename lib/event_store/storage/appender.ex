@@ -22,7 +22,7 @@ defmodule EventStore.Storage.Appender do
   def append(conn, stream_id, events, opts) do
     stream_uuid = stream_uuid(events)
 
-    Postgrex.transaction(
+    MyXQL.transaction(
       conn,
       fn transaction ->
         events
@@ -31,7 +31,7 @@ defmodule EventStore.Storage.Appender do
         |> Enum.map(fn batch ->
           case insert_event_batch(transaction, batch, opts) do
             :ok -> Enum.map(batch, & &1.event_id)
-            {:error, reason} -> Postgrex.rollback(transaction, reason)
+            {:error, reason} -> MyXQL.rollback(transaction, reason)
           end
         end)
         |> Enum.each(fn event_ids ->
@@ -46,7 +46,7 @@ defmodule EventStore.Storage.Appender do
                :ok <- insert_link_events(transaction, parameters, @all_stream_id, event_count, opts) do
             :ok
           else
-            {:error, reason} -> Postgrex.rollback(transaction, reason)
+            {:error, reason} -> MyXQL.rollback(transaction, reason)
           end
         end)
       end,
@@ -77,7 +77,7 @@ defmodule EventStore.Storage.Appender do
   def link(conn, stream_id, event_ids, opts \\ [])
 
   def link(conn, stream_id, event_ids, opts) do
-    Postgrex.transaction(
+    MyXQL.transaction(
       conn,
       fn transaction ->
         event_ids
@@ -94,7 +94,7 @@ defmodule EventStore.Storage.Appender do
           with :ok <- insert_link_events(transaction, parameters, stream_id, count, opts) do
             :ok
           else
-            {:error, reason} -> Postgrex.rollback(transaction, reason)
+            {:error, reason} -> MyXQL.rollback(transaction, reason)
           end
         end)
       end,
@@ -136,7 +136,7 @@ defmodule EventStore.Storage.Appender do
     parameters = build_insert_parameters(events)
 
     conn
-    |> Postgrex.query(statement, parameters, opts)
+    |> MyXQL.query(statement, parameters, opts)
     |> handle_response()
   end
 
@@ -160,7 +160,7 @@ defmodule EventStore.Storage.Appender do
     params = [stream_id | [event_count | parameters]]
 
     conn
-    |> Postgrex.query(statement, params, opts)
+    |> MyXQL.query(statement, params, opts)
     |> handle_response()
   end
 
@@ -169,22 +169,22 @@ defmodule EventStore.Storage.Appender do
     params = [stream_id | [event_count | parameters]]
 
     conn
-    |> Postgrex.query(statement, params, opts)
+    |> MyXQL.query(statement, params, opts)
     |> handle_response()
   end
 
   defp uuid(nil), do: nil
   defp uuid(uuid), do: UUID.string_to_binary!(uuid)
 
-  defp handle_response({:ok, %Postgrex.Result{num_rows: rows}}) do
+  defp handle_response({:ok, %MyXQL.Result{num_rows: rows}}) do
     case rows do
       0 -> {:error, :not_found}
       _ -> :ok
     end
   end
 
-  defp handle_response({:error, %Postgrex.Error{} = error}) do
-    %Postgrex.Error{
+  defp handle_response({:error, %MyXQL.Error{} = error}) do
+    %MyXQL.Error{
       postgres: %{
         code: error_code,
         constraint: constraint,

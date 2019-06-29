@@ -7,7 +7,7 @@ defmodule EventStore.Storage.LockTest do
   test "acquire exclusive subscription lock" do
     config = Config.parsed() |> Config.default_postgrex_opts()
 
-    {:ok, conn} = Postgrex.start_link(config)
+    {:ok, conn} = MyXQL.start_link(config)
 
     assert :ok = Lock.try_acquire_exclusive_lock(conn, 1)
   end
@@ -15,8 +15,8 @@ defmodule EventStore.Storage.LockTest do
   test "acquire and release lock by connection" do
     config = Config.parsed() |> Config.default_postgrex_opts()
 
-    {:ok, conn1} = Postgrex.start_link(config)
-    {:ok, conn2} = Postgrex.start_link(config)
+    {:ok, conn1} = MyXQL.start_link(config)
+    {:ok, conn2} = MyXQL.start_link(config)
 
     # conn1 acquire lock
     assert :ok = Lock.try_acquire_exclusive_lock(conn1, 1)

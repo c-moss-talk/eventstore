@@ -70,9 +70,9 @@ defmodule EventStore.Storage.Reader do
 
     defp from_timestamp(%DateTime{} = timestamp), do: timestamp
 
-    if Code.ensure_loaded?(Postgrex.Timestamp) do
-      defp from_timestamp(%Postgrex.Timestamp{} = timestamp) do
-        %Postgrex.Timestamp{
+    if Code.ensure_loaded?(MyXQL.Timestamp) do
+      defp from_timestamp(%MyXQL.Timestamp{} = timestamp) do
+        %MyXQL.Timestamp{
           year: year,
           month: month,
           day: day,
@@ -97,14 +97,14 @@ defmodule EventStore.Storage.Reader do
     def read_events_forward(conn, stream_id, start_version, count, opts) do
       query = Statements.read_events_forward()
 
-      case Postgrex.query(conn, query, [stream_id, start_version, count], opts) do
-        {:ok, %Postgrex.Result{num_rows: 0}} ->
+      case MyXQL.query(conn, query, [stream_id, start_version, count], opts) do
+        {:ok, %MyXQL.Result{num_rows: 0}} ->
           {:ok, []}
 
-        {:ok, %Postgrex.Result{rows: rows}} ->
+        {:ok, %MyXQL.Result{rows: rows}} ->
           {:ok, rows}
 
-        {:error, %Postgrex.Error{postgres: %{message: reason}}} ->
+        {:error, %MyXQL.Error{postgres: %{message: reason}}} ->
           Logger.warn(fn -> "Failed to read events from stream due to: #{inspect(reason)}" end)
 
           {:error, reason}

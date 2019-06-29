@@ -7,7 +7,7 @@ defmodule EventStore.AdvisoryLocksTest do
   setup do
     postgrex_config = Config.parsed() |> Config.default_postgrex_opts()
 
-    {:ok, conn} = Postgrex.start_link(postgrex_config)
+    {:ok, conn} = MyXQL.start_link(postgrex_config)
 
     [
       conn: conn
@@ -74,6 +74,6 @@ defmodule EventStore.AdvisoryLocksTest do
   end
 
   defp connection_down do
-    send(AdvisoryLocks, {:DOWN, AdvisoryLocks.Postgrex, nil, :shutdown})
+    send(AdvisoryLocks, {:DOWN, AdvisoryLocks.MyXQL, nil, :shutdown})
   end
 end

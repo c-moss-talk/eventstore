@@ -61,14 +61,14 @@ defmodule EventStore.Storage.Subscription do
 
     def execute(conn, opts) do
       conn
-      |> Postgrex.query(Statements.query_all_subscriptions(), [], opts)
+      |> MyXQL.query(Statements.query_all_subscriptions(), [], opts)
       |> handle_response()
     end
 
-    defp handle_response({:ok, %Postgrex.Result{num_rows: 0}}),
+    defp handle_response({:ok, %MyXQL.Result{num_rows: 0}}),
       do: {:ok, []}
 
-    defp handle_response({:ok, %Postgrex.Result{rows: rows}}),
+    defp handle_response({:ok, %MyXQL.Result{rows: rows}}),
       do: {:ok, Subscription.Adapter.to_subscriptions(rows)}
   end
 
@@ -77,7 +77,7 @@ defmodule EventStore.Storage.Subscription do
 
     def execute(conn, stream_uuid, subscription_name, opts) do
       conn
-      |> Postgrex.query(
+      |> MyXQL.query(
         Statements.query_get_subscription(),
         [stream_uuid, subscription_name],
         opts
@@ -85,10 +85,10 @@ defmodule EventStore.Storage.Subscription do
       |> handle_response()
     end
 
-    defp handle_response({:ok, %Postgrex.Result{num_rows: 0}}),
+    defp handle_response({:ok, %MyXQL.Result{num_rows: 0}}),
       do: {:error, :subscription_not_found}
 
-    defp handle_response({:ok, %Postgrex.Result{rows: rows}}),
+    defp handle_response({:ok, %MyXQL.Result{rows: rows}}),
       do: {:ok, Subscription.Adapter.to_subscription(rows)}
   end
 
@@ -104,7 +104,7 @@ defmodule EventStore.Storage.Subscription do
         end)
 
       conn
-      |> Postgrex.query(
+      |> MyXQL.query(
         Statements.create_subscription(),
         [stream_uuid, subscription_name, start_from],
         opts
@@ -112,7 +112,7 @@ defmodule EventStore.Storage.Subscription do
       |> handle_response(stream_uuid, subscription_name)
     end
 
-    defp handle_response({:ok, %Postgrex.Result{rows: rows}}, stream_uuid, subscription_name) do
+    defp handle_response({:ok, %MyXQL.Result{rows: rows}}, stream_uuid, subscription_name) do
       _ =
         Logger.debug(fn ->
           "Created subscription on stream \"#{stream_uuid}\" named \"#{subscription_name}\""
@@ -122,7 +122,7 @@ defmodule EventStore.Storage.Subscription do
     end
 
     defp handle_response(
-           {:error, %Postgrex.Error{postgres: %{code: :unique_violation}}},
+           {:error, %MyXQL.Error{postgres: %{code: :unique_violation}}},
            stream_uuid,
            subscription_name
          ) do
@@ -151,7 +151,7 @@ defmodule EventStore.Storage.Subscription do
 
     def execute(conn, stream_uuid, subscription_name, last_seen, opts) do
       conn
-      |> Postgrex.query(
+      |> MyXQL.query(
         Statements.ack_last_seen_event(),
         [stream_uuid, subscription_name, last_seen],
         opts
@@ -187,7 +187,7 @@ defmodule EventStore.Storage.Subscription do
         end)
 
       conn
-      |> Postgrex.query(Statements.delete_subscription(), [stream_uuid, subscription_name], opts)
+      |> MyXQL.query(Statements.delete_subscription(), [stream_uuid, subscription_name], opts)
       |> handle_response(stream_uuid, subscription_name)
     end
 

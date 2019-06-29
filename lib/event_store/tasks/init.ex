@@ -29,7 +29,7 @@ defmodule EventStore.Tasks.Init do
   def exec(config, opts) do
     opts = Keyword.merge([is_mix: false, quiet: false], opts)
 
-    {:ok, conn} = Postgrex.start_link(config)
+    {:ok, conn} = MyXQL.start_link(config)
 
     case run_query!(conn, @is_events_table_exists) do
       %{rows: [[true]]} ->
@@ -48,6 +48,6 @@ defmodule EventStore.Tasks.Init do
   end
 
   defp run_query!(conn, query) do
-    Postgrex.query!(conn, query, [])
+    MyXQL.query!(conn, query, [])
   end
 end

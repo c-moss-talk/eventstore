@@ -47,20 +47,20 @@ defmodule EventStore.Notifications.Supervisor do
         Supervisor.child_spec(
           {MonitoredServer,
            [
-             {Postgrex.Notifications, :start_link, [postgrex_config]},
+             {MyXQL.Notifications, :start_link, [postgrex_config]},
              [
-               name: Listener.Postgrex
+               name: Listener.MyXQL
              ]
            ]},
-          id: Listener.Postgrex
+          id: Listener.MyXQL
         ),
         Supervisor.child_spec(
           {MonitoredServer,
            [
-             {Postgrex, :start_link, [postgrex_config]},
-             [name: Reader.Postgrex]
+             {MyXQL, :start_link, [postgrex_config]},
+             [name: Reader.MyXQL]
            ]},
-          id: Reader.Postgrex
+          id: Reader.MyXQL
         ),
         {Listener, []},
         {Reader, Config.serializer()},

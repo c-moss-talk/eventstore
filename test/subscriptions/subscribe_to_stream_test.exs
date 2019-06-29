@@ -5,7 +5,7 @@ defmodule EventStore.Subscriptions.SubscribeToStreamTest do
   alias EventStore.Subscriptions.Subscription
   alias EventStore.Support.CollectingSubscriber
 
-  @conn EventStore.Postgrex
+  @conn EventStore.MyXQL
 
   setup do
     subscription_name = UUID.uuid4()
