@@ -7,12 +7,10 @@ defmodule EventStore.Tasks.Init do
   alias EventStore.Storage.Initializer
 
   @is_events_table_exists """
-    SELECT EXISTS (
-      SELECT 1
-      FROM   information_schema.tables
-      WHERE  table_schema = 'public'
-      AND    table_name = 'events'
-    )
+    SELECT COUNT(*)
+    FROM information_schema.tables
+    WHERE table_schema = 'eventstore_dev'
+    AND table_name = 'events';
   """
 
   @doc """
@@ -32,10 +30,10 @@ defmodule EventStore.Tasks.Init do
     {:ok, conn} = MyXQL.start_link(config)
 
     case run_query!(conn, @is_events_table_exists) do
-      %{rows: [[true]]} ->
+      %{rows: [[1]]} ->
         write_info("The EventStore database has already been initialized.", opts)
 
-      %{rows: [[false]]} ->
+      %{rows: [[0]]} ->
         Initializer.run!(conn)
 
         write_info("The EventStore database has been initialized.", opts)

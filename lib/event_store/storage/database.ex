@@ -74,14 +74,16 @@ defmodule EventStore.Storage.Database do
     database =
       Keyword.fetch!(opts, :database) || raise ":database is nil in repository configuration"
 
-    encoding = opts[:encoding] || "UTF8"
+    # encoding = opts[:encoding] || "UTF8"
     opts = Keyword.put(opts, :database, "mysql")
 
     command =
-      ~s(CREATE DATABASE "#{database}" ENCODING '#{encoding}')
+      ~s(CREATE DATABASE #{database} CHARACTER SET utf8 COLLATE utf8_unicode_ci)
       |> concat_if(opts[:template], &"TEMPLATE=#{&1}")
       |> concat_if(opts[:lc_ctype], &"LC_CTYPE='#{&1}'")
       |> concat_if(opts[:lc_collate], &"LC_COLLATE='#{&1}'")
+
+    IO.puts(command);
 
     case run_query(command, opts) do
       {:ok, _} ->
@@ -159,7 +161,7 @@ defmodule EventStore.Storage.Database do
 
   # Taken from ecto/adapters/mysql/connection.ex
   defp execute(conn, sql, params, opts) when is_binary(sql) or is_list(sql) do
-    query = %MyXQL.Query{name: "", statement: sql}
+    query = %MyXQL.Query{name: "", statement: sql, ref: make_ref()}
     opts = [function: :prepare_execute] ++ opts
 
     case DBConnection.prepare_execute(conn, query, params, opts) do

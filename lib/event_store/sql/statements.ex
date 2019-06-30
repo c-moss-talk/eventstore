@@ -11,12 +11,12 @@ defmodule EventStore.Sql.Statements do
       create_stream_uuid_index(),
       seed_all_stream(),
       create_events_table(),
-      prevent_event_update(),
-      prevent_event_delete(),
+      # prevent_event_update(),
+      # prevent_event_delete(),
       create_stream_events_table(),
       create_stream_events_index(),
-      prevent_stream_events_update(),
-      prevent_stream_events_delete(),
+      # prevent_stream_events_update(),
+      # prevent_stream_events_delete(),
       create_notify_events_function(),
       create_event_notification_trigger(),
       create_subscriptions_table(),
@@ -57,10 +57,10 @@ RESTART IDENTITY;
 """
 CREATE TABLE streams
 (
-    stream_id bigserial PRIMARY KEY NOT NULL,
-    stream_uuid text NOT NULL,
+    stream_id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    stream_uuid char(32) NOT NULL,
     stream_version bigint default 0 NOT NULL,
-    created_at timestamp with time zone default now() NOT NULL
+    created_at timestamp default now() NOT NULL
 );
 """
   end
@@ -82,13 +82,13 @@ INSERT INTO streams (stream_id, stream_uuid, stream_version) VALUES (0, '$all', 
 """
 CREATE TABLE events
 (
-    event_id uuid PRIMARY KEY NOT NULL,
+    event_id binary(16) PRIMARY KEY NOT NULL,
     event_type text NOT NULL,
-    causation_id uuid NULL,
-    correlation_id uuid NULL,
+    causation_id binary(16) NULL,
+    correlation_id binary(16) NULL,
     data #{column_data_type()} NOT NULL,
     metadata #{column_data_type()} NULL,
-    created_at timestamp with time zone default now() NOT NULL
+    created_at timestamp default now() NOT NULL
 );
 """
   end
@@ -111,7 +111,7 @@ CREATE RULE no_delete_events AS ON DELETE TO events DO INSTEAD NOTHING;
 """
 CREATE TABLE stream_events
 (
-  event_id uuid NOT NULL REFERENCES events (event_id),
+  event_id binary(16) NOT NULL REFERENCES events (event_id),
   stream_id bigint NOT NULL REFERENCES streams (stream_id),
   stream_version bigint NOT NULL,
   original_stream_id bigint REFERENCES streams (stream_id),
@@ -143,10 +143,9 @@ CREATE RULE no_delete_stream_events AS ON DELETE TO stream_events DO INSTEAD NOT
 
   defp create_notify_events_function do
 """
-CREATE OR REPLACE FUNCTION notify_events()
-  RETURNS trigger AS $$
-DECLARE
-  payload text;
+DELIMITER $$
+CREATE TRIGGER notify_event
+DECLARE payload text;
 BEGIN
     -- Payload text contains:
     --  * `stream_uuid`
@@ -162,7 +161,6 @@ BEGIN
 
     RETURN NULL;
 END;
-$$ LANGUAGE plpgsql;
 """
   end
 
@@ -178,11 +176,11 @@ FOR EACH ROW EXECUTE PROCEDURE notify_events();
 """
 CREATE TABLE subscriptions
 (
-    subscription_id bigserial PRIMARY KEY NOT NULL,
-    stream_uuid text NOT NULL,
+    subscription_id BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    stream_uuid char(32) NOT NULL,
     subscription_name text NOT NULL,
     last_seen bigint NULL,
-    created_at timestamp with time zone default now() NOT NULL
+    created_at timestamp default now() NOT NULL
 );
 """
   end
@@ -197,12 +195,12 @@ CREATE UNIQUE INDEX ix_subscriptions_stream_uuid_subscription_name ON subscripti
 """
 CREATE TABLE snapshots
 (
-    source_uuid text PRIMARY KEY NOT NULL,
+    source_uuid char(32) PRIMARY KEY NOT NULL,
     source_version bigint NOT NULL,
     source_type text NOT NULL,
     data #{column_data_type()} NOT NULL,
     metadata #{column_data_type()} NULL,
-    created_at timestamp with time zone default now() NOT NULL
+    created_at timestamp default now() NOT NULL
 );
 """
   end
@@ -215,7 +213,7 @@ CREATE TABLE schema_migrations
     major_version int NOT NULL,
     minor_version int NOT NULL,
     patch_version int NOT NULL,
-    migrated_at timestamp with time zone default now() NOT NULL,
+    migrated_at timestamp default now() NOT NULL,
     PRIMARY KEY(major_version, minor_version, patch_version)
 );
 """
@@ -503,5 +501,5 @@ LIMIT $3;
     |> Enum.intersperse(",")
   end
 
-  defp column_data_type, do: Config.column_data_type()
+  defp column_data_type, do: 'json'
 end
